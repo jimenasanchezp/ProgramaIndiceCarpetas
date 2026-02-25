@@ -1,118 +1,160 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 namespace ProgramaIndiceCarpetas
 {
     public partial class Form1 : Form
     {
-        // Esta variable mantiene nuestro índice en memoria para búsquedas rápidas
-        private List<DirectorioInfo> _indiceGlobal;
-        private string _rutaActualSeleccionada = string.Empty;
+        private string rutaRaizActual = "";
+        private List<CarpetaInfo> indiceGlobal = new List<CarpetaInfo>();
 
         public Form1()
         {
             InitializeComponent();
-            _indiceGlobal = new List<DirectorioInfo>();
-
-            // Opcional: Configurar el DataGridView para que se ajuste bonito
-            dgvIndice.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvIndice.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvIndice.ReadOnly = true;
         }
 
-
-
-        // 🔹 MÉTODO CENTRAL: ESCANEAR, MOSTRAR Y GUARDAR
-        private void ProcesarCarpeta()
-        {
-            Cursor = Cursors.WaitCursor; // Cambia el cursor para indicar que está cargando
-
-            // 1. Escanear
-            _indiceGlobal = _motorIndice.EscanearDirectorio(_rutaActualSeleccionada);
-
-            // 2. Mostrar en el DataGridView
-            ActualizarGrid(_indiceGlobal);
-
-            // 3. Generar el CSV en la misma carpeta raíz (o donde prefieras)
-            string rutaCsv = Path.Combine(_rutaActualSeleccionada, "IndiceDeArchivos.csv");
-            _motorIndice.GenerarArchivoCSV(_indiceGlobal, rutaCsv);
-
-            Cursor = Cursors.Default;
-        }
-
-
-        // 🔹 MÉTODO AUXILIAR PARA LLENAR EL DATAGRIDVIEW
-        private void ActualizarGrid(List<DirectorioInfo> listaMostrar)
-        {
-            // Mapeamos la lista a un formato anónimo para que se vea limpio en las columnas del DataGridView
-            var datosVisuales = listaMostrar.Select(d => new
-            {
-                Carpeta = d.NombreCarpeta,
-                Cantidad = d.CantidadArchivos,
-                Archivos = string.Join("; ", d.Archivos),
-                Ruta = d.RutaCompleta
-            }).ToList();
-
-            dgvIndice.DataSource = null; // Limpiamos primero
-            dgvIndice.DataSource = datosVisuales;
-        }
-
-        private void btnSeleccionar_Click_1(object sender, EventArgs e)
+        // 🔹 1. Selección de carpeta
+        private void btnSeleccionar_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog fbd = new FolderBrowserDialog())
             {
                 fbd.Description = "Selecciona la carpeta raíz a indexar";
-
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    _rutaActualSeleccionada = fbd.SelectedPath;
-                    lblRuta.Text = $"Ruta: {_rutaActualSeleccionada}";
-
+                    rutaRaizActual = fbd.SelectedPath;
+                    txtRuta.Text = rutaRaizActual;
                     ProcesarCarpeta();
                 }
             }
         }
 
+        // 🔹 5. Botón Actualizar
         private void btnActualizar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(_rutaActualSeleccionada) || !Directory.Exists(_rutaActualSeleccionada))
+            if (!string.IsNullOrEmpty(rutaRaizActual) && Directory.Exists(rutaRaizActual))
             {
-                MessageBox.Show("Primero selecciona una carpeta válida.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            ProcesarCarpeta();
-        }
-
-        private void txtBuscar_TextChanged_1(object sender, EventArgs e)
-        {
-            string textoBusqueda = txtBuscar.Text.ToLower().Trim();
-
-            if (string.IsNullOrEmpty(textoBusqueda))
-            {
-                // Si está vacío, mostramos todo
-                ActualizarGrid(_indiceGlobal);
+                ProcesarCarpeta();
+                MessageBox.Show("Índice actualizado correctamente.", "Actualización", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                // Filtramos: Busca si el nombre de la carpeta coincide, O si algún archivo interno coincide
-                var resultados = _indiceGlobal.Where(dir => !(!dir.NombreCarpeta.ToLower().Contains(textoBusqueda) &&
-!                   dir.Archivos.Any(archivo => archivo.ToLower().Contains(textoBusqueda)))
-                ).ToList();
+                MessageBox.Show("Por favor, selecciona una carpeta válida primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
 
-                ActualizarGrid(resultados);
+        // 🔹 Flujo principal: Escanear, poblar árbol y generar CSV
+        private void ProcesarCarpeta()
+        {
+            tvEstructura.Nodes.Clear();
+            indiceGlobal.Clear();
+
+            DirectoryInfo dirRaiz = new DirectoryInfo(rutaRaizActual);
+            TreeNode nodoRaiz = new TreeNode(dirRaiz.Name);
+            tvEstructura.Nodes.Add(nodoRaiz);
+
+            Cursor.Current = Cursors.WaitCursor; // Cambiar el cursor mientras escanea
+            EscanearDirectorio(dirRaiz, nodoRaiz);
+            Cursor.Current = Cursors.Default;
+
+            nodoRaiz.Expand();
+            GenerarArchivoCSV();
+        }
+
+        // 🔹 2 y 3. Visualización e Indexación (Recursiva)
+        private void EscanearDirectorio(DirectoryInfo dir, TreeNode nodoPadre)
+        {
+            try
+            {
+                FileInfo[] archivos = dir.GetFiles();
+                CarpetaInfo info = new CarpetaInfo
+                {
+                    NombreCarpeta = dir.Name,
+                    RutaCompleta = dir.FullName,
+                    CantidadArchivos = archivos.Length,
+                    Archivos = archivos.Select(a => a.Name).ToList()
+                };
+
+                indiceGlobal.Add(info);
+
+                foreach (var archivo in archivos)
+                {
+                    nodoPadre.Nodes.Add(new TreeNode(archivo.Name) { ForeColor = System.Drawing.Color.Gray });
+                }
+
+                foreach (DirectoryInfo subDir in dir.GetDirectories())
+                {
+                    TreeNode subNodo = new TreeNode(subDir.Name);
+                    nodoPadre.Nodes.Add(subNodo);
+                    EscanearDirectorio(subDir, subNodo);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Ignorar carpetas del sistema a las que no se tiene acceso
+            }
+        }
+
+        // 🔹 3. Generación del índice (Archivo CSV)
+        private void GenerarArchivoCSV()
+        {
+            try
+            {
+                string rutaCsv = Path.Combine(rutaRaizActual, "IndiceCarpetas.csv");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("Carpeta,RutaCompleta,CantidadArchivos,Archivos");
+
+                foreach (var item in indiceGlobal)
+                {
+                    string archivosUnidos = string.Join("; ", item.Archivos);
+                    sb.AppendLine($"\"{item.NombreCarpeta}\",\"{item.RutaCompleta}\",{item.CantidadArchivos},\"{archivosUnidos}\"");
+                }
+
+                File.WriteAllText(rutaCsv, sb.ToString(), Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al generar el CSV: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 🔹 4. Buscador de archivos
+        private void btnBuscar_Click(object sender, EventArgs e)
+        {
+            string query = txtBuscar.Text.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(query)) return;
+
+            dgvResultados.Rows.Clear();
+
+            var resultados = indiceGlobal
+                .Where(c => c.Archivos.Any(a => a.ToLower().Contains(query)))
+                .ToList();
+
+            foreach (var carpeta in resultados)
+            {
+                var archivosEncontrados = carpeta.Archivos.Where(a => a.ToLower().Contains(query));
+                foreach (var archivo in archivosEncontrados)
+                {
+                    dgvResultados.Rows.Add(archivo, carpeta.NombreCarpeta, carpeta.RutaCompleta);
+                }
+            }
+
+            if (dgvResultados.Rows.Count == 0)
+            {
+                MessageBox.Show("No se encontraron archivos con ese nombre.", "Búsqueda", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }
 
-    class DirectorioInfo
+    // 🔹 Estructura de Datos
+    public class CarpetaInfo
     {
-        public string NombreCarpeta { get; internal set; }
-        public int CantidadArchivos { get; internal set; }
-        public List<string> Archivos { get; internal set; }
-        public string RutaCompleta { get; internal set; }
+        public string NombreCarpeta { get; set; }
+        public string RutaCompleta { get; set; }
+        public int CantidadArchivos { get; set; }
+        public List<string> Archivos { get; set; } = new List<string>();
     }
 }
