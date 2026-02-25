@@ -20,6 +20,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.btnGuardarCSV = new System.Windows.Forms.Button();
             this.btnActualizar = new System.Windows.Forms.Button();
             this.btnSeleccionar = new System.Windows.Forms.Button();
             this.txtRuta = new System.Windows.Forms.TextBox();
@@ -45,6 +46,7 @@
             // pnlTop
             // 
             this.pnlTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(243)))), ((int)(((byte)(243)))));
+            this.pnlTop.Controls.Add(this.btnGuardarCSV);
             this.pnlTop.Controls.Add(this.btnActualizar);
             this.pnlTop.Controls.Add(this.btnSeleccionar);
             this.pnlTop.Controls.Add(this.txtRuta);
@@ -52,8 +54,22 @@
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(984, 55);
+            this.pnlTop.Size = new System.Drawing.Size(984, 65); // Altura incrementada
             this.pnlTop.TabIndex = 0;
+            // 
+            // btnGuardarCSV
+            // 
+            this.btnGuardarCSV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGuardarCSV.BackColor = System.Drawing.Color.White;
+            this.btnGuardarCSV.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.btnGuardarCSV.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGuardarCSV.Location = new System.Drawing.Point(760, 18);
+            this.btnGuardarCSV.Name = "btnGuardarCSV";
+            this.btnGuardarCSV.Size = new System.Drawing.Size(105, 30);
+            this.btnGuardarCSV.TabIndex = 4;
+            this.btnGuardarCSV.Text = "💾 Guardar CSV";
+            this.btnGuardarCSV.UseVisualStyleBackColor = false;
+            this.btnGuardarCSV.Click += new System.EventHandler(this.btnGuardarCSV_Click);
             // 
             // btnActualizar
             // 
@@ -61,9 +77,9 @@
             this.btnActualizar.BackColor = System.Drawing.Color.White;
             this.btnActualizar.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
             this.btnActualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnActualizar.Location = new System.Drawing.Point(882, 14);
+            this.btnActualizar.Location = new System.Drawing.Point(875, 18);
             this.btnActualizar.Name = "btnActualizar";
-            this.btnActualizar.Size = new System.Drawing.Size(90, 26);
+            this.btnActualizar.Size = new System.Drawing.Size(95, 30);
             this.btnActualizar.TabIndex = 3;
             this.btnActualizar.Text = "↻ Actualizar";
             this.btnActualizar.UseVisualStyleBackColor = false;
@@ -76,9 +92,9 @@
             this.btnSeleccionar.FlatAppearance.BorderSize = 0;
             this.btnSeleccionar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSeleccionar.ForeColor = System.Drawing.Color.White;
-            this.btnSeleccionar.Location = new System.Drawing.Point(761, 14);
+            this.btnSeleccionar.Location = new System.Drawing.Point(640, 18);
             this.btnSeleccionar.Name = "btnSeleccionar";
-            this.btnSeleccionar.Size = new System.Drawing.Size(115, 26);
+            this.btnSeleccionar.Size = new System.Drawing.Size(110, 30);
             this.btnSeleccionar.TabIndex = 2;
             this.btnSeleccionar.Text = "Examinar...";
             this.btnSeleccionar.UseVisualStyleBackColor = false;
@@ -90,16 +106,16 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtRuta.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRuta.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtRuta.Location = new System.Drawing.Point(60, 15);
+            this.txtRuta.Location = new System.Drawing.Point(60, 21);
             this.txtRuta.Name = "txtRuta";
             this.txtRuta.ReadOnly = true;
-            this.txtRuta.Size = new System.Drawing.Size(695, 25);
+            this.txtRuta.Size = new System.Drawing.Size(565, 25);
             this.txtRuta.TabIndex = 1;
             // 
             // lblRuta
             // 
             this.lblRuta.AutoSize = true;
-            this.lblRuta.Location = new System.Drawing.Point(12, 19);
+            this.lblRuta.Location = new System.Drawing.Point(15, 25);
             this.lblRuta.Name = "lblRuta";
             this.lblRuta.Size = new System.Drawing.Size(35, 15);
             this.lblRuta.TabIndex = 0;
@@ -108,21 +124,21 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 55);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 65);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.tvEstructura);
-            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(10);
+            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(15, 15, 5, 15);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgvResultados);
             this.splitContainer1.Panel2.Controls.Add(this.pnlBusqueda);
-            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
-            this.splitContainer1.Size = new System.Drawing.Size(984, 506);
-            this.splitContainer1.SplitterDistance = 270;
+            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(5, 15, 15, 15);
+            this.splitContainer1.Size = new System.Drawing.Size(984, 496);
+            this.splitContainer1.SplitterDistance = 300; // Más espacio para el TreeView
             this.splitContainer1.TabIndex = 1;
             // 
             // tvEstructura
@@ -130,9 +146,9 @@
             this.tvEstructura.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.tvEstructura.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tvEstructura.ItemHeight = 24;
-            this.tvEstructura.Location = new System.Drawing.Point(10, 10);
+            this.tvEstructura.Location = new System.Drawing.Point(15, 15);
             this.tvEstructura.Name = "tvEstructura";
-            this.tvEstructura.Size = new System.Drawing.Size(250, 486);
+            this.tvEstructura.Size = new System.Drawing.Size(280, 466);
             this.tvEstructura.TabIndex = 0;
             // 
             // dgvResultados
@@ -152,7 +168,7 @@
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvResultados.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvResultados.ColumnHeadersHeight = 30;
+            this.dgvResultados.ColumnHeadersHeight = 35;
             this.dgvResultados.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colArchivo,
             this.colCarpeta,
@@ -168,24 +184,24 @@
             this.dgvResultados.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvResultados.EnableHeadersVisualStyles = false;
             this.dgvResultados.GridColor = System.Drawing.Color.WhiteSmoke;
-            this.dgvResultados.Location = new System.Drawing.Point(0, 52);
+            this.dgvResultados.Location = new System.Drawing.Point(5, 65);
             this.dgvResultados.Name = "dgvResultados";
             this.dgvResultados.ReadOnly = true;
             this.dgvResultados.RowHeadersVisible = false;
             this.dgvResultados.RowTemplate.Height = 28;
             this.dgvResultados.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvResultados.Size = new System.Drawing.Size(700, 444);
+            this.dgvResultados.Size = new System.Drawing.Size(660, 416);
             this.dgvResultados.TabIndex = 1;
             // 
             // colArchivo
             // 
-            this.colArchivo.HeaderText = "Nombre";
+            this.colArchivo.HeaderText = "Nombre del Archivo";
             this.colArchivo.Name = "colArchivo";
             this.colArchivo.ReadOnly = true;
             // 
             // colCarpeta
             // 
-            this.colCarpeta.HeaderText = "Carpeta";
+            this.colCarpeta.HeaderText = "Carpeta Contenedora";
             this.colCarpeta.Name = "colCarpeta";
             this.colCarpeta.ReadOnly = true;
             // 
@@ -200,9 +216,9 @@
             this.pnlBusqueda.Controls.Add(this.btnBuscar);
             this.pnlBusqueda.Controls.Add(this.txtBuscar);
             this.pnlBusqueda.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlBusqueda.Location = new System.Drawing.Point(0, 10);
+            this.pnlBusqueda.Location = new System.Drawing.Point(5, 15);
             this.pnlBusqueda.Name = "pnlBusqueda";
-            this.pnlBusqueda.Size = new System.Drawing.Size(700, 42);
+            this.pnlBusqueda.Size = new System.Drawing.Size(660, 50); // Mayor altura para separar de la tabla
             this.pnlBusqueda.TabIndex = 0;
             // 
             // btnBuscar
@@ -211,9 +227,9 @@
             this.btnBuscar.BackColor = System.Drawing.Color.White;
             this.btnBuscar.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
             this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBuscar.Location = new System.Drawing.Point(625, 0);
+            this.btnBuscar.Location = new System.Drawing.Point(565, 0);
             this.btnBuscar.Name = "btnBuscar";
-            this.btnBuscar.Size = new System.Drawing.Size(75, 25);
+            this.btnBuscar.Size = new System.Drawing.Size(85, 27);
             this.btnBuscar.TabIndex = 1;
             this.btnBuscar.Text = "Buscar";
             this.btnBuscar.UseVisualStyleBackColor = false;
@@ -224,10 +240,10 @@
             this.txtBuscar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtBuscar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtBuscar.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtBuscar.Location = new System.Drawing.Point(0, 0);
+            this.txtBuscar.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtBuscar.Location = new System.Drawing.Point(0, 1);
             this.txtBuscar.Name = "txtBuscar";
-            this.txtBuscar.Size = new System.Drawing.Size(619, 25);
+            this.txtBuscar.Size = new System.Drawing.Size(550, 25);
             this.txtBuscar.TabIndex = 0;
             // 
             // Form1
@@ -239,10 +255,10 @@
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.pnlTop);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.MinimumSize = new System.Drawing.Size(800, 500);
+            this.MinimumSize = new System.Drawing.Size(850, 500);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Explorador de Índices";
+            this.Text = "Explorador";
             this.pnlTop.ResumeLayout(false);
             this.pnlTop.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -263,6 +279,7 @@
         private System.Windows.Forms.Label lblRuta;
         private System.Windows.Forms.Button btnSeleccionar;
         private System.Windows.Forms.Button btnActualizar;
+        private System.Windows.Forms.Button btnGuardarCSV;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TreeView tvEstructura;
         private System.Windows.Forms.Panel pnlBusqueda;

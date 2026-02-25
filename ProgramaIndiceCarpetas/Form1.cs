@@ -19,21 +19,17 @@ namespace ProgramaIndiceCarpetas
             ConfigurarEstiloModerno();
         }
 
-        // 🔹 Configuración Visual Moderna (Íconos y Estilos)
         private void ConfigurarEstiloModerno()
         {
-            // Crear íconos en memoria para no depender de archivos externos
             ImageList imageList = new ImageList { ColorDepth = ColorDepth.Depth32Bit, ImageSize = new Size(16, 16) };
 
-            // Dibujar ícono de carpeta
             Bitmap bmpFolder = new Bitmap(16, 16);
             using (Graphics g = Graphics.FromImage(bmpFolder))
             {
-                g.FillRectangle(new SolidBrush(Color.FromArgb(255, 201, 34)), 1, 2, 14, 11); // Carpeta amarilla
-                g.FillRectangle(new SolidBrush(Color.FromArgb(230, 175, 15)), 1, 2, 7, 3);   // Pestaña
+                g.FillRectangle(new SolidBrush(Color.FromArgb(255, 201, 34)), 1, 2, 14, 11);
+                g.FillRectangle(new SolidBrush(Color.FromArgb(230, 175, 15)), 1, 2, 7, 3);
             }
 
-            // Dibujar ícono de archivo
             Bitmap bmpFile = new Bitmap(16, 16);
             using (Graphics g = Graphics.FromImage(bmpFile))
             {
@@ -45,7 +41,7 @@ namespace ProgramaIndiceCarpetas
             imageList.Images.Add("file", bmpFile);
 
             tvEstructura.ImageList = imageList;
-            tvEstructura.ShowLines = false; // Quita las líneas punteadas estilo XP
+            tvEstructura.ShowLines = false;
         }
 
         private void btnSeleccionar_Click(object sender, EventArgs e)
@@ -68,6 +64,32 @@ namespace ProgramaIndiceCarpetas
             {
                 ProcesarCarpeta();
             }
+            else
+            {
+                MessageBox.Show("Selecciona una carpeta válida primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // 🔹 NUEVO: Botón para guardar manualmente el CSV
+        private void btnGuardarCSV_Click(object sender, EventArgs e)
+        {
+            if (indiceGlobal.Count == 0)
+            {
+                MessageBox.Show("No hay datos para guardar. Escanea una carpeta primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "Archivo CSV (*.csv)|*.csv";
+                sfd.Title = "Guardar índice como...";
+                sfd.FileName = "IndiceCarpetas.csv";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    GenerarArchivoCSV(sfd.FileName);
+                }
+            }
         }
 
         private void ProcesarCarpeta()
@@ -84,7 +106,6 @@ namespace ProgramaIndiceCarpetas
             Cursor.Current = Cursors.Default;
 
             nodoRaiz.Expand();
-            GenerarArchivoCSV();
         }
 
         private void EscanearDirectorio(DirectoryInfo dir, TreeNode nodoPadre)
@@ -117,11 +138,11 @@ namespace ProgramaIndiceCarpetas
             catch (UnauthorizedAccessException) { }
         }
 
-        private void GenerarArchivoCSV()
+        // 🔹 Modificado para recibir la ruta donde el usuario eligió guardar
+        private void GenerarArchivoCSV(string rutaDestino)
         {
             try
             {
-                string rutaCsv = Path.Combine(rutaRaizActual, "IndiceCarpetas.csv");
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("Carpeta,RutaCompleta,CantidadArchivos,Archivos");
 
@@ -130,7 +151,8 @@ namespace ProgramaIndiceCarpetas
                     string archivosUnidos = string.Join("; ", item.Archivos);
                     sb.AppendLine($"\"{item.NombreCarpeta}\",\"{item.RutaCompleta}\",{item.CantidadArchivos},\"{archivosUnidos}\"");
                 }
-                File.WriteAllText(rutaCsv, sb.ToString(), Encoding.UTF8);
+                File.WriteAllText(rutaDestino, sb.ToString(), Encoding.UTF8);
+                MessageBox.Show("Archivo CSV guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
