@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,9 +16,38 @@ namespace ProgramaIndiceCarpetas
         public Form1()
         {
             InitializeComponent();
+            ConfigurarEstiloModerno();
         }
 
-        // 🔹 1. Selección de carpeta
+        // 🔹 Configuración Visual Moderna (Íconos y Estilos)
+        private void ConfigurarEstiloModerno()
+        {
+            // Crear íconos en memoria para no depender de archivos externos
+            ImageList imageList = new ImageList { ColorDepth = ColorDepth.Depth32Bit, ImageSize = new Size(16, 16) };
+
+            // Dibujar ícono de carpeta
+            Bitmap bmpFolder = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmpFolder))
+            {
+                g.FillRectangle(new SolidBrush(Color.FromArgb(255, 201, 34)), 1, 2, 14, 11); // Carpeta amarilla
+                g.FillRectangle(new SolidBrush(Color.FromArgb(230, 175, 15)), 1, 2, 7, 3);   // Pestaña
+            }
+
+            // Dibujar ícono de archivo
+            Bitmap bmpFile = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmpFile))
+            {
+                g.FillRectangle(Brushes.White, 3, 1, 10, 14);
+                g.DrawRectangle(Pens.LightGray, 3, 1, 10, 14);
+            }
+
+            imageList.Images.Add("folder", bmpFolder);
+            imageList.Images.Add("file", bmpFile);
+
+            tvEstructura.ImageList = imageList;
+            tvEstructura.ShowLines = false; // Quita las líneas punteadas estilo XP
+        }
+
         private void btnSeleccionar_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog fbd = new FolderBrowserDialog())
@@ -32,31 +62,24 @@ namespace ProgramaIndiceCarpetas
             }
         }
 
-        // 🔹 5. Botón Actualizar
         private void btnActualizar_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(rutaRaizActual) && Directory.Exists(rutaRaizActual))
             {
                 ProcesarCarpeta();
-                MessageBox.Show("Índice actualizado correctamente.", "Actualización", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("Por favor, selecciona una carpeta válida primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        // 🔹 Flujo principal: Escanear, poblar árbol y generar CSV
         private void ProcesarCarpeta()
         {
             tvEstructura.Nodes.Clear();
             indiceGlobal.Clear();
 
             DirectoryInfo dirRaiz = new DirectoryInfo(rutaRaizActual);
-            TreeNode nodoRaiz = new TreeNode(dirRaiz.Name);
+            TreeNode nodoRaiz = new TreeNode(dirRaiz.Name) { ImageKey = "folder", SelectedImageKey = "folder" };
             tvEstructura.Nodes.Add(nodoRaiz);
 
-            Cursor.Current = Cursors.WaitCursor; // Cambiar el cursor mientras escanea
+            Cursor.Current = Cursors.WaitCursor;
             EscanearDirectorio(dirRaiz, nodoRaiz);
             Cursor.Current = Cursors.Default;
 
@@ -64,7 +87,6 @@ namespace ProgramaIndiceCarpetas
             GenerarArchivoCSV();
         }
 
-        // 🔹 2 y 3. Visualización e Indexación (Recursiva)
         private void EscanearDirectorio(DirectoryInfo dir, TreeNode nodoPadre)
         {
             try
@@ -82,23 +104,19 @@ namespace ProgramaIndiceCarpetas
 
                 foreach (var archivo in archivos)
                 {
-                    nodoPadre.Nodes.Add(new TreeNode(archivo.Name) { ForeColor = System.Drawing.Color.Gray });
+                    nodoPadre.Nodes.Add(new TreeNode(archivo.Name) { ImageKey = "file", SelectedImageKey = "file", ForeColor = Color.FromArgb(50, 50, 50) });
                 }
 
                 foreach (DirectoryInfo subDir in dir.GetDirectories())
                 {
-                    TreeNode subNodo = new TreeNode(subDir.Name);
+                    TreeNode subNodo = new TreeNode(subDir.Name) { ImageKey = "folder", SelectedImageKey = "folder" };
                     nodoPadre.Nodes.Add(subNodo);
                     EscanearDirectorio(subDir, subNodo);
                 }
             }
-            catch (UnauthorizedAccessException)
-            {
-                // Ignorar carpetas del sistema a las que no se tiene acceso
-            }
+            catch (UnauthorizedAccessException) { }
         }
 
-        // 🔹 3. Generación del índice (Archivo CSV)
         private void GenerarArchivoCSV()
         {
             try
@@ -112,16 +130,14 @@ namespace ProgramaIndiceCarpetas
                     string archivosUnidos = string.Join("; ", item.Archivos);
                     sb.AppendLine($"\"{item.NombreCarpeta}\",\"{item.RutaCompleta}\",{item.CantidadArchivos},\"{archivosUnidos}\"");
                 }
-
                 File.WriteAllText(rutaCsv, sb.ToString(), Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al generar el CSV: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al generar CSV: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 🔹 4. Buscador de archivos
         private void btnBuscar_Click(object sender, EventArgs e)
         {
             string query = txtBuscar.Text.Trim().ToLower();
@@ -129,27 +145,18 @@ namespace ProgramaIndiceCarpetas
 
             dgvResultados.Rows.Clear();
 
-            var resultados = indiceGlobal
-                .Where(c => c.Archivos.Any(a => a.ToLower().Contains(query)))
-                .ToList();
+            var resultados = indiceGlobal.Where(c => c.Archivos.Any(a => a.ToLower().Contains(query))).ToList();
 
             foreach (var carpeta in resultados)
             {
-                var archivosEncontrados = carpeta.Archivos.Where(a => a.ToLower().Contains(query));
-                foreach (var archivo in archivosEncontrados)
+                foreach (var archivo in carpeta.Archivos.Where(a => a.ToLower().Contains(query)))
                 {
                     dgvResultados.Rows.Add(archivo, carpeta.NombreCarpeta, carpeta.RutaCompleta);
                 }
             }
-
-            if (dgvResultados.Rows.Count == 0)
-            {
-                MessageBox.Show("No se encontraron archivos con ese nombre.", "Búsqueda", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
         }
     }
 
-    // 🔹 Estructura de Datos
     public class CarpetaInfo
     {
         public string NombreCarpeta { get; set; }
