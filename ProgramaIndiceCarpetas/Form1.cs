@@ -81,13 +81,40 @@ namespace ProgramaIndiceCarpetas
 
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
-                sfd.Filter = "Archivo CSV (*.csv)|*.csv";
+                // 1. AQUÍ DEFINIMOS LAS EXTENSIONES DISPONIBLES
+                // El usuario verá un menú desplegable para elegir el formato deseado.
+                sfd.Filter = "Archivo CSV (*.csv)|*.csv|Archivo de Texto (*.txt)|*.txt|Archivo JSON (*.json)|*.json|Documento PDF (*.pdf)|*.pdf";
                 sfd.Title = "Guardar índice como...";
-                sfd.FileName = "IndiceCarpetas.csv";
+                sfd.FileName = "IndiceCarpetas";
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    GenerarArchivoCSV(sfd.FileName);
+                    try
+                    {
+                        // 2. AQUÍ SE UTILIZA LA CLASE ExportadorDatos
+                        // Dependiendo de la extensión que el usuario eligió en el filtro, llamamos al método correspondiente.
+                        switch (sfd.FilterIndex)
+                        {
+                            case 1: // Si eligió la primera opción (CSV)
+                                ExportadorDatos.ExportarCSV(indiceGlobal, sfd.FileName);
+                                break;
+                            case 2: // Si eligió la segunda opción (TXT)
+                                ExportadorDatos.ExportarTXT(indiceGlobal, sfd.FileName);
+                                break;
+                            case 3: // Si eligió la tercera opción (JSON)
+                                ExportadorDatos.ExportarJSON(indiceGlobal, sfd.FileName);
+                                break;
+                            case 4: // Si eligió la cuarta opción (PDF)
+                                ExportadorDatos.ExportarPDF(indiceGlobal, sfd.FileName);
+                                break;
+                        }
+
+                        MessageBox.Show("Archivo exportado correctamente en el formato seleccionado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error al exportar el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
@@ -138,28 +165,6 @@ namespace ProgramaIndiceCarpetas
             catch (UnauthorizedAccessException) { }
         }
 
-        // 🔹 Modificado para recibir la ruta donde el usuario eligió guardar
-        private void GenerarArchivoCSV(string rutaDestino)
-        {
-            try
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("Carpeta,RutaCompleta,CantidadArchivos,Archivos");
-
-                foreach (var item in indiceGlobal)
-                {
-                    string archivosUnidos = string.Join("; ", item.Archivos);
-                    sb.AppendLine($"\"{item.NombreCarpeta}\",\"{item.RutaCompleta}\",{item.CantidadArchivos},\"{archivosUnidos}\"");
-                }
-                File.WriteAllText(rutaDestino, sb.ToString(), Encoding.UTF8);
-                MessageBox.Show("Archivo CSV guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al generar CSV: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void btnBuscar_Click(object sender, EventArgs e)
         {
             string query = txtBuscar.Text.Trim().ToLower();
@@ -174,6 +179,68 @@ namespace ProgramaIndiceCarpetas
                 foreach (var archivo in carpeta.Archivos.Where(a => a.ToLower().Contains(query)))
                 {
                     dgvResultados.Rows.Add(archivo, carpeta.NombreCarpeta, carpeta.RutaCompleta);
+                }
+            }
+        }
+
+        private void btnExportarArchivo_Click(object sender, EventArgs e)
+        {
+            // 1. Verificar que haya un archivo seleccionado en la tabla
+            if (dgvResultados.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Por favor, selecciona un archivo de la lista para exportarlo.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 2. Obtener la ruta completa del archivo seleccionado
+            string nombreArchivo = dgvResultados.SelectedRows[0].Cells["colArchivo"].Value.ToString();
+            string rutaCarpeta = dgvResultados.SelectedRows[0].Cells["colRuta"].Value.ToString();
+            string rutaCompletaOrigen = Path.Combine(rutaCarpeta, nombreArchivo);
+
+            if (!File.Exists(rutaCompletaOrigen))
+            {
+                MessageBox.Show("El archivo original no se encuentra en el disco.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 3. Preguntar al usuario dónde y en qué formato quiere guardar EL ARCHIVO
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Title = "Exportar archivo seleccionado como...";
+                sfd.FileName = Path.GetFileNameWithoutExtension(nombreArchivo) + "_exportado";
+                sfd.Filter = "Documento PDF (*.pdf)|*.pdf|Archivo de Texto (*.txt)|*.txt|Archivo JSON (*.json)|*.json|Archivo CSV (*.csv)|*.csv";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        Cursor.Current = Cursors.WaitCursor;
+
+                        // 4. AQUI SE UTILIZA LA CLASE ESTÁTICA dependiendo de la extensión elegida
+                        switch (sfd.FilterIndex)
+                        {
+                            case 1: // PDF
+                                ConvertidorArchivos.ExportarAPdf(rutaCompletaOrigen, sfd.FileName);
+                                break;
+                            case 2: // TXT
+                                ConvertidorArchivos.ExportarATxt(rutaCompletaOrigen, sfd.FileName);
+                                break;
+                            case 3: // JSON
+                                ConvertidorArchivos.ExportarAJson(rutaCompletaOrigen, sfd.FileName);
+                                break;
+                            case 4: // CSV
+                                ConvertidorArchivos.ExportarACsv(rutaCompletaOrigen, sfd.FileName);
+                                break;
+                        }
+
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("El archivo se exportó correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("Error al convertir el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }

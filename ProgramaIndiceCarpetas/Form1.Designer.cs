@@ -20,7 +20,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.pnlTop = new System.Windows.Forms.Panel();
-            this.btnGuardarCSV = new System.Windows.Forms.Button();
             this.btnActualizar = new System.Windows.Forms.Button();
             this.btnSeleccionar = new System.Windows.Forms.Button();
             this.txtRuta = new System.Windows.Forms.TextBox();
@@ -32,6 +31,7 @@
             this.colCarpeta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colRuta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlBusqueda = new System.Windows.Forms.Panel();
+            this.btnExportarArchivo = new System.Windows.Forms.Button();
             this.btnBuscar = new System.Windows.Forms.Button();
             this.txtBuscar = new System.Windows.Forms.TextBox();
             this.pnlTop.SuspendLayout();
@@ -46,7 +46,6 @@
             // pnlTop
             // 
             this.pnlTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(243)))), ((int)(((byte)(243)))));
-            this.pnlTop.Controls.Add(this.btnGuardarCSV);
             this.pnlTop.Controls.Add(this.btnActualizar);
             this.pnlTop.Controls.Add(this.btnSeleccionar);
             this.pnlTop.Controls.Add(this.txtRuta);
@@ -54,22 +53,8 @@
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(984, 65); // Altura incrementada
+            this.pnlTop.Size = new System.Drawing.Size(984, 65);
             this.pnlTop.TabIndex = 0;
-            // 
-            // btnGuardarCSV
-            // 
-            this.btnGuardarCSV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGuardarCSV.BackColor = System.Drawing.Color.White;
-            this.btnGuardarCSV.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-            this.btnGuardarCSV.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGuardarCSV.Location = new System.Drawing.Point(760, 18);
-            this.btnGuardarCSV.Name = "btnGuardarCSV";
-            this.btnGuardarCSV.Size = new System.Drawing.Size(105, 30);
-            this.btnGuardarCSV.TabIndex = 4;
-            this.btnGuardarCSV.Text = "💾 Guardar CSV";
-            this.btnGuardarCSV.UseVisualStyleBackColor = false;
-            this.btnGuardarCSV.Click += new System.EventHandler(this.btnGuardarCSV_Click);
             // 
             // btnActualizar
             // 
@@ -92,7 +77,7 @@
             this.btnSeleccionar.FlatAppearance.BorderSize = 0;
             this.btnSeleccionar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSeleccionar.ForeColor = System.Drawing.Color.White;
-            this.btnSeleccionar.Location = new System.Drawing.Point(640, 18);
+            this.btnSeleccionar.Location = new System.Drawing.Point(755, 18);
             this.btnSeleccionar.Name = "btnSeleccionar";
             this.btnSeleccionar.Size = new System.Drawing.Size(110, 30);
             this.btnSeleccionar.TabIndex = 2;
@@ -102,14 +87,14 @@
             // 
             // txtRuta
             // 
-            this.txtRuta.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.txtRuta.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtRuta.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRuta.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtRuta.Location = new System.Drawing.Point(60, 21);
             this.txtRuta.Name = "txtRuta";
             this.txtRuta.ReadOnly = true;
-            this.txtRuta.Size = new System.Drawing.Size(565, 25);
+            this.txtRuta.Size = new System.Drawing.Size(685, 29);
             this.txtRuta.TabIndex = 1;
             // 
             // lblRuta
@@ -117,7 +102,7 @@
             this.lblRuta.AutoSize = true;
             this.lblRuta.Location = new System.Drawing.Point(15, 25);
             this.lblRuta.Name = "lblRuta";
-            this.lblRuta.Size = new System.Drawing.Size(35, 15);
+            this.lblRuta.Size = new System.Drawing.Size(42, 20);
             this.lblRuta.TabIndex = 0;
             this.lblRuta.Text = "Ruta:";
             // 
@@ -138,7 +123,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.pnlBusqueda);
             this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(5, 15, 15, 15);
             this.splitContainer1.Size = new System.Drawing.Size(984, 496);
-            this.splitContainer1.SplitterDistance = 300; // Más espacio para el TreeView
+            this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.TabIndex = 1;
             // 
             // tvEstructura
@@ -188,6 +173,7 @@
             this.dgvResultados.Name = "dgvResultados";
             this.dgvResultados.ReadOnly = true;
             this.dgvResultados.RowHeadersVisible = false;
+            this.dgvResultados.RowHeadersWidth = 51;
             this.dgvResultados.RowTemplate.Height = 28;
             this.dgvResultados.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvResultados.Size = new System.Drawing.Size(660, 416);
@@ -196,38 +182,57 @@
             // colArchivo
             // 
             this.colArchivo.HeaderText = "Nombre del Archivo";
+            this.colArchivo.MinimumWidth = 6;
             this.colArchivo.Name = "colArchivo";
             this.colArchivo.ReadOnly = true;
             // 
             // colCarpeta
             // 
             this.colCarpeta.HeaderText = "Carpeta Contenedora";
+            this.colCarpeta.MinimumWidth = 6;
             this.colCarpeta.Name = "colCarpeta";
             this.colCarpeta.ReadOnly = true;
             // 
             // colRuta
             // 
             this.colRuta.HeaderText = "Ruta Completa";
+            this.colRuta.MinimumWidth = 6;
             this.colRuta.Name = "colRuta";
             this.colRuta.ReadOnly = true;
             // 
             // pnlBusqueda
             // 
+            this.pnlBusqueda.Controls.Add(this.btnExportarArchivo);
             this.pnlBusqueda.Controls.Add(this.btnBuscar);
             this.pnlBusqueda.Controls.Add(this.txtBuscar);
             this.pnlBusqueda.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlBusqueda.Location = new System.Drawing.Point(5, 15);
             this.pnlBusqueda.Name = "pnlBusqueda";
-            this.pnlBusqueda.Size = new System.Drawing.Size(660, 50); // Mayor altura para separar de la tabla
+            this.pnlBusqueda.Size = new System.Drawing.Size(660, 50);
             this.pnlBusqueda.TabIndex = 0;
+            // 
+            // btnExportarArchivo
+            // 
+            this.btnExportarArchivo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnExportarArchivo.BackColor = System.Drawing.Color.White;
+            this.btnExportarArchivo.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.btnExportarArchivo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExportarArchivo.Location = new System.Drawing.Point(400, 0);
+            this.btnExportarArchivo.Name = "btnExportarArchivo";
+            this.btnExportarArchivo.Size = new System.Drawing.Size(160, 27);
+            this.btnExportarArchivo.TabIndex = 2;
+            this.btnExportarArchivo.Text = "📄 Exportar Archivo...";
+            this.btnExportarArchivo.UseVisualStyleBackColor = false;
+            this.btnExportarArchivo.Click += new System.EventHandler(this.btnExportarArchivo_Click);
             // 
             // btnBuscar
             // 
             this.btnBuscar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBuscar.BackColor = System.Drawing.Color.White;
-            this.btnBuscar.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.btnBuscar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(120)))), ((int)(((byte)(215)))));
+            this.btnBuscar.FlatAppearance.BorderSize = 0;
             this.btnBuscar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBuscar.Location = new System.Drawing.Point(565, 0);
+            this.btnBuscar.ForeColor = System.Drawing.Color.White;
+            this.btnBuscar.Location = new System.Drawing.Point(575, 0);
             this.btnBuscar.Name = "btnBuscar";
             this.btnBuscar.Size = new System.Drawing.Size(85, 27);
             this.btnBuscar.TabIndex = 1;
@@ -237,18 +242,18 @@
             // 
             // txtBuscar
             // 
-            this.txtBuscar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.txtBuscar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtBuscar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtBuscar.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtBuscar.Location = new System.Drawing.Point(0, 1);
             this.txtBuscar.Name = "txtBuscar";
-            this.txtBuscar.Size = new System.Drawing.Size(550, 25);
+            this.txtBuscar.Size = new System.Drawing.Size(390, 30);
             this.txtBuscar.TabIndex = 0;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(984, 561);
@@ -279,7 +284,6 @@
         private System.Windows.Forms.Label lblRuta;
         private System.Windows.Forms.Button btnSeleccionar;
         private System.Windows.Forms.Button btnActualizar;
-        private System.Windows.Forms.Button btnGuardarCSV;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TreeView tvEstructura;
         private System.Windows.Forms.Panel pnlBusqueda;
@@ -289,5 +293,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colArchivo;
         private System.Windows.Forms.DataGridViewTextBoxColumn colCarpeta;
         private System.Windows.Forms.DataGridViewTextBoxColumn colRuta;
+        private System.Windows.Forms.Button btnExportarArchivo; // 🔹 BOTON NUEVO
     }
 }
